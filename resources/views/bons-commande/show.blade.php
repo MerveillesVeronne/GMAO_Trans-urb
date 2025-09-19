@@ -231,9 +231,7 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <a href="{{ route('commande.details', $commande) }}" class="text-blue-600 hover:text-blue-900" title="Voir les détails">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    <a href="{{ route('commande.details', $commande) }}" class="text-blue-600 hover:text-blue-900">Voir</a>
                                                 </td>
                                             </tr>
                                         @endforeach

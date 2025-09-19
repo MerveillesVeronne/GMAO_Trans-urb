@@ -192,12 +192,12 @@ function confirmerAnnulation() {
             if (data.success) {
                 location.reload();
             } else {
-                alert('Erreur lors de l\'annulation : ' + data.message);
+                showErrorModal('notificationModal', 'Erreur', 'Erreur lors de l\'annulation : ' + data.message);
             }
         })
         .catch(error => {
             console.error('Erreur:', error);
-            alert('Erreur lors de l\'annulation');
+            showErrorModal('notificationModal', 'Erreur', 'Erreur lors de l\'annulation');
         });
     }
     fermerModalAnnulation();
@@ -210,4 +210,9 @@ document.getElementById('modalAnnulation').addEventListener('click', function(e)
     }
 });
 </script>
+
+    <!-- Modal de notification -->
+    <x-modal id="notificationModal" title="Notification" type="info">
+        Message de notification
+    </x-modal>
 @endsection 

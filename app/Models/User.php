@@ -134,4 +134,26 @@ class User extends Authenticatable
     {
         return $query->where('service_id', $serviceId);
     }
+
+    /**
+     * Vérifier si l'utilisateur peut signer pour la maintenance
+     */
+    public function canSignMaintenance()
+    {
+        // Chef de service maintenance ou directeur technique
+        return $this->hasPermission('sign_maintenance') || 
+               $this->belongsToService('MAINT') ||
+               $this->role && in_array($this->role->nom_role, ['Chef de Service Maintenance', 'Directeur Technique']);
+    }
+
+    /**
+     * Vérifier si l'utilisateur peut signer pour la logistique
+     */
+    public function canSignLogistique()
+    {
+        // Chef de service logistique ou directeur logistique
+        return $this->hasPermission('sign_logistique') || 
+               $this->belongsToService('LOGI') ||
+               $this->role && in_array($this->role->nom_role, ['Chef de Service Logistique', 'Directeur Logistique']);
+    }
 }

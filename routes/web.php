@@ -215,19 +215,85 @@ Route::middleware('auth')->group(function () {
     })->name('chauffeur.fdt');
 });
 
-// Routes placeholders pour le module maintenance
-Route::get('/maintenance/vehicules', function () {
-    return view('maintenance.vehicules.index');
-})->name('maintenance.vehicules.index');
+        // Routes pour le module maintenance
+        Route::middleware(['auth', 'module:maintenance'])->prefix('maintenance')->name('maintenance.')->group(function () {
+            // Routes pour les véhicules
+            Route::resource('vehicules', \App\Http\Controllers\VehiculeController::class);
+            Route::get('vehicules-data', [\App\Http\Controllers\VehiculeController::class, 'getVehicules'])->name('vehicules.data');
+            Route::get('vehicules/export/pdf', [\App\Http\Controllers\VehiculeController::class, 'exportPdf'])->name('vehicules.export.pdf');
+            Route::get('vehicules/{vehicule}/interventions/export/pdf', [\App\Http\Controllers\VehiculeController::class, 'exportInterventionsPdf'])->name('vehicules.interventions.export.pdf');
+        
+        // Routes pour les carburations
+        Route::resource('carburations', \App\Http\Controllers\CarburationController::class);
+        Route::get('vehicules/{vehicule}/carburations', [\App\Http\Controllers\CarburationController::class, 'getForVehicule'])->name('vehicules.carburations');
+        Route::get('carburations/{carburation}/export/pdf', [\App\Http\Controllers\CarburationController::class, 'exportPdf'])->name('carburations.export.pdf');
 
-Route::get('/maintenance/interventions', function () {
-    return view('maintenance.interventions.index');
-})->name('maintenance.interventions.index');
+            // Routes pour les lignes de transport
+            Route::post('lignes-transport', [\App\Http\Controllers\LigneTransportController::class, 'store'])->name('lignes-transport.store');
+            Route::get('lignes-transport/select', [\App\Http\Controllers\LigneTransportController::class, 'getForSelect'])->name('lignes-transport.select');
 
-Route::get('/maintenance/pieces', function () {
-    return view('maintenance.pieces.index');
-})->name('maintenance.pieces.index');
+            // Routes pour les interventions
+            Route::resource('interventions', \App\Http\Controllers\InterventionController::class);
+            Route::post('interventions/{intervention}/status', [\App\Http\Controllers\InterventionController::class, 'changeStatus'])->name('interventions.status');
+            Route::post('interventions/{intervention}/signature', [\App\Http\Controllers\InterventionController::class, 'signer'])->name('interventions.signature');
+            Route::get('interventions/{intervention}/export/pdf', [\App\Http\Controllers\InterventionController::class, 'exportPdf'])->name('interventions.export.pdf');
 
-Route::get('/maintenance/planning', function () {
-    return view('maintenance.planning.index');
-})->name('maintenance.planning.index');
+            // Routes pour le magasin (pièces et huiles) - LECTURE SEULE
+            Route::get('magasin', [\App\Http\Controllers\PieceController::class, 'index'])->name('magasin.index');
+            Route::get('magasin/{piece}', [\App\Http\Controllers\PieceController::class, 'show'])->name('magasin.show');
+            Route::get('magasin/category/{categorie}', [\App\Http\Controllers\PieceController::class, 'getByCategory'])->name('magasin.category');
+            Route::get('magasin/low-stock', [\App\Http\Controllers\PieceController::class, 'getLowStock'])->name('magasin.low-stock');
+
+            // Routes pour le planning de maintenance
+            Route::resource('planning', \App\Http\Controllers\PlanningMaintenanceController::class);
+            Route::post('planning/{planning}/status', [\App\Http\Controllers\PlanningMaintenanceController::class, 'changeStatus'])->name('planning.status');
+            Route::get('planning/date/{date}', [\App\Http\Controllers\PlanningMaintenanceController::class, 'getByDate'])->name('planning.date');
+            Route::get('planning/technician/{technicien}', [\App\Http\Controllers\PlanningMaintenanceController::class, 'getByTechnician'])->name('planning.technician');
+            Route::get('planning/export/pdf', [\App\Http\Controllers\PlanningMaintenanceController::class, 'exportPdf'])->name('planning.export.pdf');
+
+            // Routes pour les techniciens
+            Route::resource('techniciens', \App\Http\Controllers\IntervenantController::class);
+            Route::get('techniciens-data', [\App\Http\Controllers\IntervenantController::class, 'getTechniciens'])->name('techniciens.data');
+            Route::get('techniciens/function/{fonction}', [\App\Http\Controllers\IntervenantController::class, 'getByFunction'])->name('techniciens.function');
+            Route::get('techniciens/experts', [\App\Http\Controllers\IntervenantController::class, 'getExperts'])->name('techniciens.experts');
+
+            // Routes pour les bons de commande de maintenance (CRUD COMPLET)
+            Route::resource('bons-commande', \App\Http\Controllers\BonCommandeMaintenanceController::class);
+            Route::post('bons-commande/{bons_commande}/signer', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'signer'])->name('bons-commande.signer');
+            Route::post('bons-commande/{bons_commande}/valider', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'valider'])->name('bons-commande.valider');
+            Route::post('bons-commande/{bons_commande}/demarrer', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'demarrerIntervention'])->name('bons-commande.demarrer');
+            Route::post('bons-commande/{bons_commande}/terminer', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'terminerIntervention'])->name('bons-commande.terminer');
+            Route::get('bons-commande/{bons_commande}/pdf', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'exportPdf'])->name('bons-commande.pdf');
+            Route::get('bons-commande/signataires/liste', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'getSignataires'])->name('bons-commande.signataires');
+        });
+
+        // Routes pour le module logistique
+        Route::middleware(['auth', 'module:logistique'])->prefix('logistique')->name('logistique.')->group(function () {
+            // Dashboard logistique
+            Route::get('/', [\App\Http\Controllers\LogistiqueController::class, 'index'])->name('index');
+            
+            // Routes pour le magasin (CRUD complet)
+            Route::resource('magasin', \App\Http\Controllers\PieceController::class);
+            Route::post('magasin/{piece}/stock', [\App\Http\Controllers\PieceController::class, 'updateStock'])->name('magasin.stock');
+            Route::get('magasin/category/{categorie}', [\App\Http\Controllers\PieceController::class, 'getByCategory'])->name('magasin.category');
+            Route::get('magasin/low-stock', [\App\Http\Controllers\PieceController::class, 'getLowStock'])->name('magasin.low-stock');
+            
+            // Routes pour les bons de commande (lecture + signature)
+            Route::get('bons-commande', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'indexLogistique'])->name('bons-commande.index');
+            Route::get('bons-commande/{bon}', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'showLogistique'])->name('bons-commande.show');
+            Route::post('bons-commande/{bon}/signer-logistique', [\App\Http\Controllers\BonCommandeMaintenanceController::class, 'signerLogistique'])->name('bons-commande.signer');
+            
+            // Routes pour les véhicules (lecture seule)
+            Route::get('vehicules', [\App\Http\Controllers\LogistiqueVehiculeController::class, 'index'])->name('vehicules.index');
+            Route::get('vehicules/{vehicule}', [\App\Http\Controllers\LogistiqueVehiculeController::class, 'show'])->name('vehicules.show');
+            Route::get('vehicules/export/pdf', [\App\Http\Controllers\LogistiqueVehiculeController::class, 'exportPdf'])->name('vehicules.export.pdf');
+            
+            // Routes pour le planning (lecture seule avec signature)
+            Route::get('planning', [\App\Http\Controllers\LogistiquePlanningController::class, 'index'])->name('planning.index');
+            Route::get('planning/{planning}', [\App\Http\Controllers\LogistiquePlanningController::class, 'show'])->name('planning.show');
+            Route::get('planning/export/pdf', [\App\Http\Controllers\LogistiquePlanningController::class, 'exportPdf'])->name('planning.export.pdf');
+            
+            // Routes pour les interventions (lecture seule avec signature)
+            Route::get('interventions/{intervention}', [\App\Http\Controllers\LogistiquePlanningController::class, 'showIntervention'])->name('interventions.show');
+            Route::post('interventions/{intervention}/signer', [\App\Http\Controllers\LogistiquePlanningController::class, 'signerIntervention'])->name('interventions.signer');
+        });

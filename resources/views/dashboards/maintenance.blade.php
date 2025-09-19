@@ -24,9 +24,13 @@
         <div class="max-w-7xl mx-auto flex gap-4 px-4">
             <a href="{{ route('maintenance.index') }}" class="text-white font-semibold hover:underline">Accueil</a>
             <a href="{{ route('maintenance.vehicules.index') }}" class="text-white font-semibold hover:underline">Véhicules</a>
-            <a href="{{ route('maintenance.interventions.index') }}" class="text-white font-semibold hover:underline">Interventions</a>
-            <a href="{{ route('maintenance.pieces.index') }}" class="text-white font-semibold hover:underline">Pièces</a>
+            {{-- COMMENTÉ TEMPORAIREMENT - Liens Carburations et Interventions --}}
+            {{-- <a href="{{ route('maintenance.carburations.index') }}" class="text-white font-semibold hover:underline">Carburations</a> --}}
+            {{-- <a href="{{ route('maintenance.interventions.index') }}" class="text-white font-semibold hover:underline">Interventions</a> --}}
+            <a href="{{ route('maintenance.techniciens.index') }}" class="text-white font-semibold hover:underline">Techniciens</a>
+            <a href="{{ route('maintenance.magasin.index') }}" class="text-white font-semibold hover:underline">Magasin</a>
             <a href="{{ route('maintenance.planning.index') }}" class="text-white font-semibold hover:underline">Planning</a>
+            <a href="{{ route('maintenance.bons-commande.index') }}" class="text-white font-semibold hover:underline">Bons de Commande</a>
         </div>
     </nav>
     <!-- Statistiques -->
@@ -41,7 +45,7 @@
         </div>
         <div class="bg-white rounded-lg shadow p-6 flex flex-col items-center">
             <span class="text-green-900 font-bold text-2xl">0</span>
-            <span class="text-green-800 mt-2">Pièces en stock</span>
+            <span class="text-green-800 mt-2">Techniciens</span>
         </div>
         <div class="bg-white rounded-lg shadow p-6 flex flex-col items-center">
             <span class="text-green-900 font-bold text-2xl">0</span>

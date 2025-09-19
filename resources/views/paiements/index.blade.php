@@ -392,7 +392,7 @@
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement des données de la commande');
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors du chargement des données de la commande');
                 });
         }
         
@@ -442,7 +442,7 @@
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement de l\'historique');
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors du chargement de l\'historique');
                 });
         }
         
@@ -506,27 +506,32 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Paiement enregistré avec succès !');
-                    fermerModalPaiement();
-                    // Recharger la page pour mettre à jour les informations
-                    location.reload();
+                    showSuccessModal('notificationModal', 'Succès', 'Paiement enregistré avec succès !', function() {
+                        fermerModalPaiement();
+                        location.reload();
+                    });
                 } else {
                     if (data.errors) {
                         let errorMessage = 'Erreurs de validation:\n';
                         Object.keys(data.errors).forEach(key => {
                             errorMessage += `- ${data.errors[key].join(', ')}\n`;
                         });
-                        alert(errorMessage);
+                        showErrorModal('notificationModal', 'Erreur de validation', errorMessage);
                     } else {
-                        alert('Erreur: ' + (data.message || 'Erreur lors de l\'enregistrement'));
+                        showErrorModal('notificationModal', 'Erreur', data.message || 'Erreur lors de l\'enregistrement');
                     }
                 }
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert('Erreur lors de l\'enregistrement du paiement');
+                showErrorModal('notificationModal', 'Erreur', 'Erreur lors de l\'enregistrement du paiement');
             });
         });
     </script>
+
+    <!-- Modal de notification -->
+    <x-modal id="notificationModal" title="Notification" type="info">
+        Message de notification
+    </x-modal>
 </body>
 </html> 

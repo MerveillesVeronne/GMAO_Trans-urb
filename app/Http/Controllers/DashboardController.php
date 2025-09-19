@@ -101,6 +101,6 @@ class DashboardController extends Controller
      */
     public function logistique()
     {
-        return view('dashboards.logistique');
+        return redirect()->route('logistique.index');
     }
 } 

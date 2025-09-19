@@ -13,12 +13,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ordre important : Directions -> Services -> Roles -> Users
+        // Ordre important : Directions -> Services -> Roles -> Users -> LignesTransport
         $this->call([
             DirectionSeeder::class,
             ServiceSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            LigneTransportSeeder::class,
+            CarburationSeeder::class,
         ]);
     }
 }

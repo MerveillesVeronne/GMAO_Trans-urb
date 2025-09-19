@@ -49,23 +49,38 @@
                     <i class="fas fa-bus mr-2 text-blue-600"></i>Véhicules <i class="fas fa-chevron-down ml-1"></i>
                 </button>
                 <ul class="dropdown-content">
-                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.vehicules') }}'"><i class="fas fa-list mr-2"></i>Liste des Véhicules</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.vehicules.index') }}'"><i class="fas fa-list mr-2"></i>Liste des Véhicules</button></li>
                 </ul>
             </div>
+            {{-- COMMENTÉ TEMPORAIREMENT - Onglet Carburations --}}
+            {{-- 
+            <div class="menu-dropdown" style="position: relative;">
+                <button class="menu-btn">
+                    <i class="fas fa-gas-pump mr-2 text-yellow-600"></i>Carburations <i class="fas fa-chevron-down ml-1"></i>
+                </button>
+                <ul class="dropdown-content">
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.carburations.index') }}'"><i class="fas fa-list mr-2"></i>Liste des Carburations</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.carburations.create') }}'"><i class="fas fa-plus mr-2"></i>Nouvelle Carburation</button></li>
+                </ul>
+            </div>
+            --}}
+            {{-- COMMENTÉ TEMPORAIREMENT - Onglet Interventions --}}
+            {{-- 
             <div class="menu-dropdown" style="position: relative;">
                 <button class="menu-btn">
                     <i class="fas fa-tools mr-2 text-green-600"></i>Interventions <i class="fas fa-chevron-down ml-1"></i>
                 </button>
                 <ul class="dropdown-content">
-                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.interventions') }}'"><i class="fas fa-list mr-2"></i>Liste des Interventions</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.interventions.index') }}'"><i class="fas fa-list mr-2"></i>Liste des Interventions</button></li>
                 </ul>
             </div>
+            --}}
             <div class="menu-dropdown" style="position: relative;">
                 <button class="menu-btn">
                     <i class="fas fa-cogs mr-2 text-purple-600"></i>Pièces détachées <i class="fas fa-chevron-down ml-1"></i>
                 </button>
                 <ul class="dropdown-content">
-                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.pieces') }}'"><i class="fas fa-list mr-2"></i>Liste des Pièces</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.magasin.index') }}'"><i class="fas fa-list mr-2"></i>Liste du Magasin</button></li>
                 </ul>
             </div>
             <div class="menu-dropdown" style="position: relative;">
@@ -73,7 +88,16 @@
                     <i class="fas fa-calendar-alt mr-2 text-orange-600"></i>Planning <i class="fas fa-chevron-down ml-1"></i>
                 </button>
                 <ul class="dropdown-content">
-                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.planning') }}'"><i class="fas fa-calendar mr-2"></i>Planning</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.planning.index') }}'"><i class="fas fa-calendar mr-2"></i>Planning</button></li>
+                </ul>
+            </div>
+            <div class="menu-dropdown" style="position: relative;">
+                <button class="menu-btn">
+                    <i class="fas fa-file-invoice mr-2 text-red-600"></i>Bons de Commande <i class="fas fa-chevron-down ml-1"></i>
+                </button>
+                <ul class="dropdown-content">
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.bons-commande.index') }}'"><i class="fas fa-list mr-2"></i>Liste des Bons de Commande</button></li>
+                    <li><button class="dropdown-item" onclick="window.location.href='{{ route('maintenance.bons-commande.create') }}'"><i class="fas fa-plus mr-2"></i>Nouveau Bon de Commande</button></li>
                 </ul>
             </div>
         </div>

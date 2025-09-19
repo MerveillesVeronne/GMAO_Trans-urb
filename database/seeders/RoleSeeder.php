@@ -88,7 +88,8 @@ class RoleSeeder extends Seeder
                     'bdc.create',
                     'vehicules.manage',
                     'besoins.create',
-                    'reporting.maintenance'
+                    'reporting.maintenance',
+                    'sign_maintenance'
                 ],
                 'niveau_hierarchique' => 80,
                 'active' => true
@@ -103,7 +104,8 @@ class RoleSeeder extends Seeder
                     'bdc.sign',
                     'livraisons.manage',
                     'besoins.create',
-                    'reporting.logistique'
+                    'reporting.logistique',
+                    'sign_logistique'
                 ],
                 'niveau_hierarchique' => 80,
                 'active' => true
@@ -176,7 +178,10 @@ class RoleSeeder extends Seeder
         ];
 
         foreach ($roles as $role) {
-            Role::create($role);
+            Role::updateOrCreate(
+                ['code_role' => $role['code_role']],
+                $role
+            );
         }
     }
 }

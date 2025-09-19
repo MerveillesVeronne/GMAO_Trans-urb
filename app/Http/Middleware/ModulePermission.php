@@ -24,7 +24,7 @@ class ModulePermission
         // LOG : Vérification de la session
         \Log::info('ModulePermission: utilisateur connecté ?', ['user_id' => $user->id ?? null, 'module' => $module]);
         // Vérifier les permissions selon le module
-        if ($module === 'maintenance') {
+        if ($module === 'maintenance' || $module === 'logistique') {
             // TEMPORAIRE : accès ouvert à tout le monde pour debug
             return $next($request);
         }

@@ -530,7 +530,7 @@
                 const montant = document.querySelector('input[name="montant"]').value;
                 
                 if (!dateDebut || !duree || !montant) {
-                    alert('Veuillez remplir tous les champs obligatoires.');
+                    showErrorModal('notificationModal', 'Erreur de validation', 'Veuillez remplir tous les champs obligatoires.');
                     return;
                 }
                 
@@ -549,5 +549,10 @@
         });
     });
     </script>
+
+    <!-- Modal de notification -->
+    <x-modal id="notificationModal" title="Notification" type="info">
+        Message de notification
+    </x-modal>
 </body>
 </html> 

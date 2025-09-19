@@ -1117,7 +1117,7 @@
     }
     
     function reactiverContrat(contratId) {
-        if (confirm('Êtes-vous sûr de vouloir réactiver ce contrat ?')) {
+        showConfirmModal('notificationModal', 'Confirmation', 'Êtes-vous sûr de vouloir réactiver ce contrat ?', function() {
             fetch(`/contrats/${contratId}/reactiver`, {
                 method: 'POST',
                 headers: {
@@ -1128,17 +1128,18 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Contrat réactivé avec succès !');
-                    window.location.reload();
+                    showSuccessModal('notificationModal', 'Succès', 'Contrat réactivé avec succès !', function() {
+                        window.location.reload();
+                    });
                 } else {
-                    alert('Erreur lors de la réactivation : ' + data.message);
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors de la réactivation : ' + data.message);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Erreur lors de la réactivation du contrat');
+                showErrorModal('notificationModal', 'Erreur', 'Erreur lors de la réactivation du contrat');
             });
-        }
+        });
     }
     
     function calculerNouvelleDate() {
@@ -1171,17 +1172,18 @@
     // Gestion des formulaires
     document.getElementById('form-renouvellement').addEventListener('submit', function(e) {
         e.preventDefault();
-        alert('Renouvellement confirmé ! Le contrat sera mis à jour.');
-        closeModal('modal-renouvellement');
+        showSuccessModal('notificationModal', 'Succès', 'Renouvellement confirmé ! Le contrat sera mis à jour.', function() {
+            closeModal('modal-renouvellement');
+        });
     });
     
     document.getElementById('form-resiliation').addEventListener('submit', function(e) {
         e.preventDefault();
-        if (confirm('Êtes-vous absolument sûr de vouloir résilier ce contrat ? Cette action est irréversible.')) {
-            alert('Contrat résilié avec succès.');
-            closeModal('modal-resiliation');
-            // Ici on pourrait rediriger vers la liste avec le statut mis à jour
-        }
+        showConfirmModal('notificationModal', 'Confirmation', 'Êtes-vous absolument sûr de vouloir résilier ce contrat ? Cette action est irréversible.', function() {
+            showSuccessModal('notificationModal', 'Succès', 'Contrat résilié avec succès.', function() {
+                closeModal('modal-resiliation');
+            });
+        });
     });
 
     // Variables pour la navigation des slides
@@ -1600,7 +1602,7 @@
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement des données du contrat');
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors du chargement des données du contrat');
                 });
         }
         
@@ -1656,7 +1658,7 @@
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement de l\'historique');
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors du chargement de l\'historique');
                 });
         }
         
@@ -1709,7 +1711,7 @@
                 })
                 .catch(error => {
                     console.error('Erreur:', error);
-                    alert('Erreur lors du chargement des échéances');
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors du chargement des échéances');
                 });
         }
         
@@ -1823,11 +1825,16 @@
                     }
                 }
             })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert('Erreur lors de l\'enregistrement du paiement');
-            });
+                            .catch(error => {
+                    console.error('Erreur:', error);
+                    showErrorModal('notificationModal', 'Erreur', 'Erreur lors de l\'enregistrement du paiement');
+                });
         });
     </script>
+
+    <!-- Modal de notification -->
+    <x-modal id="notificationModal" title="Notification" type="info">
+        Message de notification
+    </x-modal>
 </body>
 </html> 
