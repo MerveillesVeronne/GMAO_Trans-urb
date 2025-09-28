@@ -1,0 +1,84 @@
+# Configuration Docker Compose pour GMAO Trans'urb (MySQL local sans réseau externe)
+
+services:
+  # Application Laravel GMAO Trans'urb
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: gmao_transurb_app_local
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    ports:
+      - "8084:80"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=mysql
+      - DB_HOST=db_local
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-gmao_transurb}
+      - DB_USERNAME=${DB_USERNAME:-gmao_user}
+      - DB_PASSWORD=${DB_PASSWORD:-gmao_password}
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+      - QUEUE_CONNECTION=sync
+    depends_on:
+      db_local:
+        condition: service_healthy
+    networks:
+      - gmao_network_local
+
+  # Base de données MySQL locale (utilise l'image système si disponible)
+  db_local:
+    image: mysql:8.0
+    container_name: gmao_transurb_db_local
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-gmao_transurb}
+      MYSQL_USER: ${DB_USERNAME:-gmao_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gmao_password}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - db_data_local:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./docker/mysql/my-local.cnf:/etc/mysql/conf.d/my.cnf:ro
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - gmao_network_local
+
+  # PHPMyAdmin pour la gestion de la base de données
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: gmao_transurb_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db_local
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USERNAME:-gmao_user}
+      PMA_PASSWORD: ${DB_PASSWORD:-gmao_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+    ports:
+      - "8085:80"
+    depends_on:
+      - db_local
+    networks:
+      - gmao_network_local
+
+volumes:
+  db_data_local:
+    driver: local
+
+networks:
+  gmao_network_local:
+    driver: bridge
