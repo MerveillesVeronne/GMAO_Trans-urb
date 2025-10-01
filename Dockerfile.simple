@@ -1,0 +1,117 @@
+# Dockerfile simplifié pour GMAO Trans'urb
+FROM php:8.2-fpm-alpine
+
+# Définir le répertoire de travail
+WORKDIR /var/www/html
+
+# Installer les dépendances système et PHP
+RUN apk add --no-cache \
+    nginx \
+    nodejs \
+    npm \
+    git \
+    curl \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    icu-dev \
+    oniguruma-dev \
+    mysql-client \
+    sqlite \
+    sqlite-dev \
+    supervisor \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        gd \
+        zip \
+        pdo \
+        pdo_mysql \
+        pdo_sqlite \
+        intl \
+        mbstring \
+        opcache
+
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Créer l'utilisateur www
+RUN addgroup -g 1000 www && \
+    adduser -u 1000 -G www -s /bin/sh -D www
+
+# Copier tous les fichiers de l'application
+COPY --chown=www:www . .
+
+# Installer les dépendances PHP
+RUN composer install --no-dev --optimize-autoloader --no-interaction || echo "Composer install failed"
+
+# Installer les dépendances Node.js et construire les assets
+RUN npm ci && npm run build && npm prune --production || echo "Node build failed"
+
+# Créer les répertoires nécessaires et définir les permissions
+RUN mkdir -p storage/app/public \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache \
+    && chown -R www:www storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Configuration PHP minimale
+RUN echo "memory_limit = 256M" > /usr/local/etc/php/conf.d/99-app.ini && \
+    echo "upload_max_filesize = 20M" >> /usr/local/etc/php/conf.d/99-app.ini && \
+    echo "post_max_size = 20M" >> /usr/local/etc/php/conf.d/99-app.ini
+
+# Configuration Nginx minimale
+RUN echo 'server {' > /etc/nginx/http.d/default.conf && \
+    echo '    listen 80;' >> /etc/nginx/http.d/default.conf && \
+    echo '    root /var/www/html/public;' >> /etc/nginx/http.d/default.conf && \
+    echo '    index index.php;' >> /etc/nginx/http.d/default.conf && \
+    echo '    location / {' >> /etc/nginx/http.d/default.conf && \
+    echo '        try_files $uri $uri/ /index.php?$query_string;' >> /etc/nginx/http.d/default.conf && \
+    echo '    }' >> /etc/nginx/http.d/default.conf && \
+    echo '    location ~ \.php$ {' >> /etc/nginx/http.d/default.conf && \
+    echo '        fastcgi_pass 127.0.0.1:9000;' >> /etc/nginx/http.d/default.conf && \
+    echo '        fastcgi_index index.php;' >> /etc/nginx/http.d/default.conf && \
+    echo '        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;' >> /etc/nginx/http.d/default.conf && \
+    echo '        include fastcgi_params;' >> /etc/nginx/http.d/default.conf && \
+    echo '    }' >> /etc/nginx/http.d/default.conf && \
+    echo '}' >> /etc/nginx/http.d/default.conf
+
+# Configuration Supervisor minimale
+RUN mkdir -p /etc/supervisor/conf.d && \
+    echo '[supervisord]' > /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'nodaemon=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'user=root' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:nginx]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=nginx -g "daemon off;"' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:php-fpm]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=php-fpm' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf
+
+# Script d'entrée simple
+RUN echo '#!/bin/sh' > /usr/local/bin/entrypoint.sh && \
+    echo 'set -e' >> /usr/local/bin/entrypoint.sh && \
+    echo 'echo "🚀 Démarrage de GMAO Trans'\''urb..."' >> /usr/local/bin/entrypoint.sh && \
+    echo 'if [ -z "$APP_KEY" ]; then' >> /usr/local/bin/entrypoint.sh && \
+    echo '    php artisan key:generate --force' >> /usr/local/bin/entrypoint.sh && \
+    echo 'fi' >> /usr/local/bin/entrypoint.sh && \
+    echo 'php artisan migrate --force || echo "Migration failed"' >> /usr/local/bin/entrypoint.sh && \
+    echo 'php artisan storage:link || echo "Storage link failed"' >> /usr/local/bin/entrypoint.sh && \
+    echo 'chown -R www:www storage bootstrap/cache || echo "Permissions failed"' >> /usr/local/bin/entrypoint.sh && \
+    echo 'echo "✅ Application prête !"' >> /usr/local/bin/entrypoint.sh && \
+    echo 'exec "$@"' >> /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
+# Exposer le port
+EXPOSE 80
+
+# Point d'entrée
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -1,0 +1,46 @@
+# Configuration Docker Compose pour le développement
+version: '3.8'
+
+services:
+  # Application Laravel GMAO Trans'urb (Développement)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gmao_transurb_app_dev
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    ports:
+      - "8080:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+      - QUEUE_CONNECTION=sync
+      - VITE_DEV_SERVER_URL=http://localhost:5173
+    networks:
+      - gmao_network_dev
+
+  # Serveur Vite pour le développement
+  vite:
+    image: node:18-alpine
+    container_name: gmao_transurb_vite_dev
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    networks:
+      - gmao_network_dev
+
+networks:
+  gmao_network_dev:
+    driver: bridge

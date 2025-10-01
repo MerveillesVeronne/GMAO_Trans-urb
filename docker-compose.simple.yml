@@ -1,0 +1,47 @@
+# Configuration Docker Compose simplifiée pour GMAO Trans'urb
+
+services:
+  # Application Laravel GMAO Trans'urb (version simplifiée)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: gmao_transurb_app_simple
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8084:80"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - APP_KEY=${APP_KEY}
+      - DB_CONNECTION=${DB_CONNECTION:-sqlite}
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+    networks:
+      - gmao_network_simple
+
+  # Base de données MySQL (optionnelle)
+  db:
+    image: mysql:8.0
+    container_name: gmao_transurb_db_simple
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-gmao_transurb}
+      MYSQL_USER: ${DB_USERNAME:-gmao_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gmao_password}
+    volumes:
+      - db_data_simple:/var/lib/mysql
+    ports:
+      - "3308:3306"
+    networks:
+      - gmao_network_simple
+
+volumes:
+  db_data_simple:
+    driver: local
+
+networks:
+  gmao_network_simple:
+    driver: bridge
